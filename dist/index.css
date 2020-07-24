@@ -1,0 +1,84 @@
+@import url('https://use.fontawesome.com/releases/v5.0.8/css/all.css');
+._index__rc-swipeout__aIv0p {
+  overflow: hidden;
+  position: relative;
+  float: left;
+}
+._index__rc-swipeout-content__2EwpB {
+  position: relative;
+  background-color: #fff;
+}
+._index__rc-swipeout-cover__RIPHd {
+  position: absolute;
+  z-index: 2;
+  background: transparent;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  display: none;
+}
+._index__rc-swipeout__aIv0p ._index__rc-swipeout-content__2EwpB,
+._index__rc-swipeout__aIv0p ._index__rc-swipeout-actions__WvaWK {
+  transition: all 250ms;
+}
+._index__rc-swipeout-swiping__1V0Ak ._index__rc-swipeout-content__2EwpB {
+  transition: none;
+}
+._index__rc-swipeout-actions__WvaWK {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  overflow: hidden;
+  white-space: nowrap;
+}
+._index__rc-swipeout-actions-left__1Txx1 {
+  left: 0;
+}
+._index__rc-swipeout-actions-right__pt_xJ {
+  right: 0;
+}
+._index__rc-swipeout-btn__17zSr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+._index__rc-swipeout-btn-text__3CGav {
+  padding: 0 12px;
+}
+._index__swipe-block__2GClK {
+  border-top:1px solid #dedede;
+  border-bottom:1px solid #dedede;
+  float: left;
+ 
+}
+
+._index__hide-mobile__2cQ9S { float: left;}
+._index__edit-button__2nC3d {
+  background-color: #4CAF50;
+  color: #fff;
+  border: 0;
+  margin-left: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  height: 44px;
+}
+._index__delete-button__3z5RF {
+  background-color: #f44336;
+  color: #fff;
+  border: 0;
+  height: 44px;
+  margin-left: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+._index__show-button__2fVoj { float: left; line-height: 44px; padding-left: 20px; padding-right: 20px;}
+@media screen and (max-width: 767px) {
+   ._index__show-button__2fVoj, ._index__hide-mobile__2cQ9S {
+    display: none;
+  }
+  ._index__rc-swipeout__aIv0p {width: 100%;}
+}
