@@ -1,5 +1,44 @@
 import React from 'react';
 
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+function _inheritsLoose(subClass, superClass) {
+  subClass.prototype = Object.create(superClass.prototype);
+  subClass.prototype.constructor = subClass;
+  _setPrototypeOf(subClass, superClass);
+}
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+  return _setPrototypeOf(o, p);
+}
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+  return target;
+}
+
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
@@ -332,12 +371,14 @@ var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 var ReactPropTypesSecret_1 = ReactPropTypesSecret;
 
+var has = Function.call.bind(Object.prototype.hasOwnProperty);
+
 var printWarning = function() {};
 
 if (process.env.NODE_ENV !== 'production') {
   var ReactPropTypesSecret$1 = ReactPropTypesSecret_1;
   var loggedTypeFailures = {};
-  var has = Function.call.bind(Object.prototype.hasOwnProperty);
+  var has$1 = has;
 
   printWarning = function(text) {
     var message = 'Warning: ' + text;
@@ -349,7 +390,7 @@ if (process.env.NODE_ENV !== 'production') {
       // This error was thrown as a convenience so that you can use this stack
       // to find the callsite that caused this warning to fire.
       throw new Error(message);
-    } catch (x) {}
+    } catch (x) { /**/ }
   };
 }
 
@@ -367,7 +408,7 @@ if (process.env.NODE_ENV !== 'production') {
 function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
   if (process.env.NODE_ENV !== 'production') {
     for (var typeSpecName in typeSpecs) {
-      if (has(typeSpecs, typeSpecName)) {
+      if (has$1(typeSpecs, typeSpecName)) {
         var error;
         // Prop type validation may throw. In case they do, we don't want to
         // fail the render phase where it didn't fail before. So we log it.
@@ -378,7 +419,8 @@ function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
           if (typeof typeSpecs[typeSpecName] !== 'function') {
             var err = Error(
               (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +
-              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.'
+              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.' +
+              'This often happens because of typos such as `PropTypes.function` instead of `PropTypes.func`.'
             );
             err.name = 'Invariant Violation';
             throw err;
@@ -426,7 +468,6 @@ checkPropTypes.resetWarningCache = function() {
 
 var checkPropTypes_1 = checkPropTypes;
 
-var has$1 = Function.call.bind(Object.prototype.hasOwnProperty);
 var printWarning$1 = function() {};
 
 if (process.env.NODE_ENV !== 'production') {
@@ -527,6 +568,7 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
   // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
   var ReactPropTypes = {
     array: createPrimitiveTypeChecker('array'),
+    bigint: createPrimitiveTypeChecker('bigint'),
     bool: createPrimitiveTypeChecker('boolean'),
     func: createPrimitiveTypeChecker('function'),
     number: createPrimitiveTypeChecker('number'),
@@ -572,8 +614,9 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
    * is prohibitively expensive if they are created too often, such as what
    * happens in oneOfType() for any type before the one that matched.
    */
-  function PropTypeError(message) {
+  function PropTypeError(message, data) {
     this.message = message;
+    this.data = data && typeof data === 'object' ? data: {};
     this.stack = '';
   }
   // Make `instanceof Error` still work for returned errors.
@@ -608,7 +651,7 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
           ) {
             printWarning$1(
               'You are manually calling a React.PropTypes validation ' +
-              'function for the `' + propFullName + '` prop on `' + componentName  + '`. This is deprecated ' +
+              'function for the `' + propFullName + '` prop on `' + componentName + '`. This is deprecated ' +
               'and will throw in the standalone `prop-types` package. ' +
               'You may be seeing this warning due to a third-party PropTypes ' +
               'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.'
@@ -647,7 +690,10 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
         // 'of type `object`'.
         var preciseType = getPreciseType(propValue);
 
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
+        return new PropTypeError(
+          'Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'),
+          {expectedType: expectedType}
+        );
       }
       return null;
     }
@@ -761,7 +807,7 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
         return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
       }
       for (var key in propValue) {
-        if (has$1(propValue, key)) {
+        if (has(propValue, key)) {
           var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret_1);
           if (error instanceof Error) {
             return error;
@@ -791,14 +837,19 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
     }
 
     function validate(props, propName, componentName, location, propFullName) {
+      var expectedTypes = [];
       for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
         var checker = arrayOfTypeCheckers[i];
-        if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret_1) == null) {
+        var checkerResult = checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret_1);
+        if (checkerResult == null) {
           return null;
         }
+        if (checkerResult.data && has(checkerResult.data, 'expectedType')) {
+          expectedTypes.push(checkerResult.data.expectedType);
+        }
       }
-
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
+      var expectedTypesMessage = (expectedTypes.length > 0) ? ', expected one of type [' + expectedTypes.join(', ') + ']': '';
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`' + expectedTypesMessage + '.'));
     }
     return createChainableTypeChecker(validate);
   }
@@ -813,6 +864,13 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
     return createChainableTypeChecker(validate);
   }
 
+  function invalidValidatorError(componentName, location, propFullName, key, type) {
+    return new PropTypeError(
+      (componentName || 'React class') + ': ' + location + ' type `' + propFullName + '.' + key + '` is invalid; ' +
+      'it must be a function, usually from the `prop-types` package, but received `' + type + '`.'
+    );
+  }
+
   function createShapeTypeChecker(shapeTypes) {
     function validate(props, propName, componentName, location, propFullName) {
       var propValue = props[propName];
@@ -822,8 +880,8 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
       }
       for (var key in shapeTypes) {
         var checker = shapeTypes[key];
-        if (!checker) {
-          continue;
+        if (typeof checker !== 'function') {
+          return invalidValidatorError(componentName, location, propFullName, key, getPreciseType(checker));
         }
         var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret_1);
         if (error) {
@@ -842,16 +900,18 @@ var factoryWithTypeCheckers = function(isValidElement, throwOnDirectAccess) {
       if (propType !== 'object') {
         return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
       }
-      // We need to check all keys in case some are required but missing from
-      // props.
+      // We need to check all keys in case some are required but missing from props.
       var allKeys = objectAssign({}, props[propName], shapeTypes);
       for (var key in allKeys) {
         var checker = shapeTypes[key];
+        if (has(shapeTypes, key) && typeof checker !== 'function') {
+          return invalidValidatorError(componentName, location, propFullName, key, getPreciseType(checker));
+        }
         if (!checker) {
           return new PropTypeError(
             'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
             '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
-            '\nValid keys: ' +  JSON.stringify(Object.keys(shapeTypes), null, '  ')
+            '\nValid keys: ' + JSON.stringify(Object.keys(shapeTypes), null, '  ')
           );
         }
         var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret_1);
@@ -1027,6 +1087,7 @@ var factoryWithThrowingShims = function() {
   // Keep this list in sync with production version in `./factoryWithTypeCheckers.js`.
   var ReactPropTypes = {
     array: shim,
+    bigint: shim,
     bool: shim,
     func: shim,
     number: shim,
@@ -1081,72 +1142,66 @@ function isDataURL(str) {
   if (str === null) {
     return false;
   }
-
-  const regex = /^\s*data:([a-z]+\/[a-z]+(;[a-z-]+=[a-z-]+)?)?(;base64)?,[a-z0-9!$&',()*+;=\-._~:@/?%\s]*\s*$/i;
+  var regex = /^\s*data:([a-z]+\/[a-z]+(;[a-z-]+=[a-z-]+)?)?(;base64)?,[a-z0-9!$&',()*+;=\-._~:@/?%\s]*\s*$/i;
   return !!str.match(regex);
 }
-
 function loadImageURL(imageURL, crossOrigin) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-
-    image.onload = () => resolve(image);
-
+  return new Promise(function (resolve, reject) {
+    var image = new Image();
+    image.onload = function () {
+      return resolve(image);
+    };
     image.onerror = reject;
-
     if (isDataURL(imageURL) === false && crossOrigin) {
       image.crossOrigin = crossOrigin;
     }
-
     image.src = imageURL;
   });
 }
 
 function loadImageFile(imageFile) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = e => {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
       try {
-        const image = loadImageURL(e.target.result);
+        var image = loadImageURL(e.target.result);
         resolve(image);
       } catch (e) {
         reject(e);
       }
     };
-
     reader.readAsDataURL(imageFile);
   });
 }
 
-const makeCancelable = promise => {
-  let hasCanceled_ = false;
-  const wrappedPromise = new Promise((resolve, reject) => {
-    promise.then(val => hasCanceled_ ? reject({
-      isCanceled: true
-    }) : resolve(val), error => hasCanceled_ ? reject({
-      isCanceled: true
-    }) : reject(error));
+var _excluded = ["scale", "rotate", "image", "border", "borderRadius", "width", "height", "position", "color", "style", "crossOrigin", "onLoadFailure", "onLoadSuccess", "onImageReady", "onImageChange", "onMouseUp", "onMouseMove", "onPositionChange", "disableBoundaryChecks", "disableHiDPIScaling"];
+var makeCancelable = function makeCancelable(promise) {
+  var hasCanceled_ = false;
+  var wrappedPromise = new Promise(function (resolve, reject) {
+    promise.then(function (val) {
+      return hasCanceled_ ? reject({
+        isCanceled: true
+      }) : resolve(val);
+    }, function (error) {
+      return hasCanceled_ ? reject({
+        isCanceled: true
+      }) : reject(error);
+    });
   });
   return {
     promise: wrappedPromise,
-
-    cancel() {
+    cancel: function cancel() {
       hasCanceled_ = true;
     }
-
   };
 };
-
-const isTouchDevice = !!(typeof window !== 'undefined' && typeof navigator !== 'undefined' && ('ontouchstart' in window || navigator.msMaxTouchPoints > 0));
-const isFileAPISupported = typeof File !== 'undefined';
-
-const isPassiveSupported = () => {
-  let passiveSupported = false;
-
+var isTouchDevice = !!(typeof window !== 'undefined' && typeof navigator !== 'undefined' && ('ontouchstart' in window || navigator.msMaxTouchPoints > 0));
+var isFileAPISupported = typeof File !== 'undefined';
+var isPassiveSupported = function isPassiveSupported() {
+  var passiveSupported = false;
   try {
-    const options = Object.defineProperty({}, 'passive', {
-      get: function () {
+    var options = Object.defineProperty({}, 'passive', {
+      get: function get() {
         passiveSupported = true;
       }
     });
@@ -1155,11 +1210,9 @@ const isPassiveSupported = () => {
   } catch (err) {
     passiveSupported = false;
   }
-
   return passiveSupported;
 };
-
-const draggableEvents = {
+var draggableEvents = {
   touch: {
     react: {
       down: 'onTouchStart',
@@ -1170,7 +1223,7 @@ const draggableEvents = {
       up: 'onTouchEnd',
       mouseUp: 'onMouseUp'
     },
-    native: {
+    "native": {
       down: 'touchstart',
       mouseDown: 'mousedown',
       drag: 'touchmove',
@@ -1187,7 +1240,7 @@ const draggableEvents = {
       move: 'onMouseMove',
       up: 'onMouseUp'
     },
-    native: {
+    "native": {
       down: 'mousedown',
       drag: 'dragStart',
       move: 'mousemove',
@@ -1195,15 +1248,14 @@ const draggableEvents = {
     }
   }
 };
-const deviceEvents = isTouchDevice ? draggableEvents.touch : draggableEvents.desktop;
-let pixelRatio = typeof window !== 'undefined' && window.devicePixelRatio ? window.devicePixelRatio : 1;
-
-const drawRoundedRect = (context, x, y, width, height, borderRadius) => {
+var deviceEvents = isTouchDevice ? draggableEvents.touch : draggableEvents.desktop;
+var pixelRatio = typeof window !== 'undefined' && window.devicePixelRatio ? window.devicePixelRatio : 1;
+var drawRoundedRect = function drawRoundedRect(context, x, y, width, height, borderRadius) {
   if (borderRadius === 0) {
     context.rect(x, y, width, height);
   } else {
-    const widthMinusRad = width - borderRadius;
-    const heightMinusRad = height - borderRadius;
+    var widthMinusRad = width - borderRadius;
+    var heightMinusRad = height - borderRadius;
     context.translate(x, y);
     context.arc(borderRadius, borderRadius, borderRadius, Math.PI, Math.PI * 1.5);
     context.lineTo(widthMinusRad, 0);
@@ -1215,199 +1267,176 @@ const drawRoundedRect = (context, x, y, width, height, borderRadius) => {
     context.translate(-x, -y);
   }
 };
-
-const defaultEmptyImage = {
+var defaultEmptyImage = {
   x: 0.5,
   y: 0.5
 };
-
-class AvatarEditor extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
+var AvatarEditor = /*#__PURE__*/function (_React$Component) {
+  function AvatarEditor(props) {
+    var _this;
+    _this = _React$Component.call(this, props) || this;
+    _this.state = {
       drag: false,
       my: null,
       mx: null,
       image: defaultEmptyImage
     };
-
-    this.handleImageReady = image => {
-      const imageState = this.getInitialSize(image.width, image.height);
+    _this.handleImageReady = function (image) {
+      var imageState = _this.getInitialSize(image.width, image.height);
       imageState.resource = image;
       imageState.x = 0.5;
       imageState.y = 0.5;
-      this.setState({
+      _this.setState({
         drag: false,
         image: imageState
-      }, this.props.onImageReady);
-      this.props.onLoadSuccess(imageState);
+      }, _this.props.onImageReady);
+      _this.props.onLoadSuccess(imageState);
     };
-
-    this.clearImage = () => {
-      const context = this.canvas.getContext('2d');
-      context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.setState({
+    _this.clearImage = function () {
+      var context = _this.canvas.getContext('2d');
+      context.clearRect(0, 0, _this.canvas.width, _this.canvas.height);
+      _this.setState({
         image: defaultEmptyImage
       });
     };
-
-    this.handleMouseDown = e => {
+    _this.handleMouseDown = function (e) {
       e = e || window.event;
       e.preventDefault();
-      this.setState({
+      _this.setState({
         drag: true,
         mx: null,
         my: null
       });
     };
-
-    this.handleMouseUp = () => {
-      if (this.state.drag) {
-        this.setState({
+    _this.handleMouseUp = function () {
+      if (_this.state.drag) {
+        _this.setState({
           drag: false
         });
-        this.props.onMouseUp();
+        _this.props.onMouseUp();
       }
     };
-
-    this.handleMouseMove = e => {
+    _this.handleMouseMove = function (e) {
       e = e || window.event;
-
-      if (this.state.drag === false) {
+      if (_this.state.drag === false) {
         return;
       }
-
       e.preventDefault();
-      const mousePositionX = e.targetTouches ? e.targetTouches[0].pageX : e.clientX;
-      const mousePositionY = e.targetTouches ? e.targetTouches[0].pageY : e.clientY;
-      const newState = {
+      var mousePositionX = e.targetTouches ? e.targetTouches[0].pageX : e.clientX;
+      var mousePositionY = e.targetTouches ? e.targetTouches[0].pageY : e.clientY;
+      var newState = {
         mx: mousePositionX,
         my: mousePositionY
       };
-      let rotate = this.props.rotate;
+      var rotate = _this.props.rotate;
       rotate %= 360;
       rotate = rotate < 0 ? rotate + 360 : rotate;
-
-      if (this.state.mx && this.state.my) {
-        const mx = this.state.mx - mousePositionX;
-        const my = this.state.my - mousePositionY;
-        const width = this.state.image.width * this.props.scale;
-        const height = this.state.image.height * this.props.scale;
-        let {
-          x: lastX,
-          y: lastY
-        } = this.getCroppingRect();
+      if (_this.state.mx && _this.state.my) {
+        var mx = _this.state.mx - mousePositionX;
+        var my = _this.state.my - mousePositionY;
+        var width = _this.state.image.width * _this.props.scale;
+        var height = _this.state.image.height * _this.props.scale;
+        var _this$getCroppingRect = _this.getCroppingRect(),
+          lastX = _this$getCroppingRect.x,
+          lastY = _this$getCroppingRect.y;
         lastX *= width;
         lastY *= height;
-
-        const toRadians = degree => degree * (Math.PI / 180);
-
-        const cos = Math.cos(toRadians(rotate));
-        const sin = Math.sin(toRadians(rotate));
-        const x = lastX + mx * cos + my * sin;
-        const y = lastY + -mx * sin + my * cos;
-        const relativeWidth = 1 / this.props.scale * this.getXScale();
-        const relativeHeight = 1 / this.props.scale * this.getYScale();
-        const position = {
+        var toRadians = function toRadians(degree) {
+          return degree * (Math.PI / 180);
+        };
+        var cos = Math.cos(toRadians(rotate));
+        var sin = Math.sin(toRadians(rotate));
+        var x = lastX + mx * cos + my * sin;
+        var y = lastY + -mx * sin + my * cos;
+        var relativeWidth = 1 / _this.props.scale * _this.getXScale();
+        var relativeHeight = 1 / _this.props.scale * _this.getYScale();
+        var position = {
           x: x / width + relativeWidth / 2,
           y: y / height + relativeHeight / 2
         };
-        this.props.onPositionChange(position);
-        newState.image = { ...this.state.image,
-          ...position
-        };
+        _this.props.onPositionChange(position);
+        newState.image = _extends({}, _this.state.image, position);
       }
-
-      this.setState(newState);
-      this.props.onMouseMove(e);
+      _this.setState(newState);
+      _this.props.onMouseMove(e);
     };
-
-    this.setCanvas = canvas => {
-      this.canvas = canvas;
+    _this.setCanvas = function (canvas) {
+      _this.canvas = canvas;
     };
-
-    this.canvas = null;
+    _this.canvas = null;
+    return _this;
   }
-
-  componentDidMount() {
+  _inheritsLoose(AvatarEditor, _React$Component);
+  var _proto = AvatarEditor.prototype;
+  _proto.componentDidMount = function componentDidMount() {
     if (this.props.disableHiDPIScaling) {
       pixelRatio = 1;
     }
-
-    const context = this.canvas.getContext('2d');
-
+    var context = this.canvas.getContext('2d');
     if (this.props.image) {
       this.loadImage(this.props.image);
     }
-
     this.paint(context);
-
     if (document) {
-      const passiveSupported = isPassiveSupported();
-      const thirdArgument = passiveSupported ? {
+      var passiveSupported = isPassiveSupported();
+      var thirdArgument = passiveSupported ? {
         passive: false
       } : false;
-      const nativeEvents = deviceEvents.native;
+      var nativeEvents = deviceEvents["native"];
       document.addEventListener(nativeEvents.move, this.handleMouseMove, thirdArgument);
       document.addEventListener(nativeEvents.up, this.handleMouseUp, thirdArgument);
-
       if (isTouchDevice) {
         document.addEventListener(nativeEvents.mouseMove, this.handleMouseMove, thirdArgument);
         document.addEventListener(nativeEvents.mouseUp, this.handleMouseUp, thirdArgument);
       }
     }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
+  };
+  _proto.componentDidUpdate = function componentDidUpdate(prevProps, prevState) {
     if (this.props.image && this.props.image !== prevProps.image || this.props.width !== prevProps.width || this.props.height !== prevProps.height) {
       this.loadImage(this.props.image);
     } else if (!this.props.image && prevState.image !== defaultEmptyImage) {
       this.clearImage();
     }
-
-    const context = this.canvas.getContext('2d');
+    var context = this.canvas.getContext('2d');
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.paint(context);
     this.paintImage(context, this.state.image, this.props.border);
-
     if (prevProps.image !== this.props.image || prevProps.width !== this.props.width || prevProps.height !== this.props.height || prevProps.position !== this.props.position || prevProps.scale !== this.props.scale || prevProps.rotate !== this.props.rotate || prevState.my !== this.state.my || prevState.mx !== this.state.mx || prevState.image.x !== this.state.image.x || prevState.image.y !== this.state.image.y) {
       this.props.onImageChange();
     }
-  }
-
-  componentWillUnmount() {
+  };
+  _proto.componentWillUnmount = function componentWillUnmount() {
     if (document) {
-      const nativeEvents = deviceEvents.native;
+      var nativeEvents = deviceEvents["native"];
       document.removeEventListener(nativeEvents.move, this.handleMouseMove, false);
       document.removeEventListener(nativeEvents.up, this.handleMouseUp, false);
-
       if (isTouchDevice) {
         document.removeEventListener(nativeEvents.mouseMove, this.handleMouseMove, false);
         document.removeEventListener(nativeEvents.mouseUp, this.handleMouseUp, false);
       }
     }
-  }
-
-  isVertical() {
+  };
+  _proto.isVertical = function isVertical() {
     return this.props.rotate % 180 !== 0;
-  }
-
-  getBorders(border = this.props.border) {
+  };
+  _proto.getBorders = function getBorders(border) {
+    if (border === void 0) {
+      border = this.props.border;
+    }
     return Array.isArray(border) ? border : [border, border];
-  }
-
-  getDimensions() {
-    const {
-      width,
-      height,
-      rotate,
-      border
-    } = this.props;
-    const canvas = {};
-    const [borderX, borderY] = this.getBorders(border);
-    const canvasWidth = width;
-    const canvasHeight = height;
-
+  };
+  _proto.getDimensions = function getDimensions() {
+    var _this$props = this.props,
+      width = _this$props.width,
+      height = _this$props.height,
+      rotate = _this$props.rotate,
+      border = _this$props.border;
+    var canvas = {};
+    var _this$getBorders = this.getBorders(border),
+      borderX = _this$getBorders[0],
+      borderY = _this$getBorders[1];
+    var canvasWidth = width;
+    var canvasHeight = height;
     if (this.isVertical()) {
       canvas.width = canvasHeight;
       canvas.height = canvasWidth;
@@ -1415,27 +1444,24 @@ class AvatarEditor extends React.Component {
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
     }
-
     canvas.width += borderX * 2;
     canvas.height += borderY * 2;
     return {
-      canvas,
-      rotate,
-      width,
-      height,
-      border
+      canvas: canvas,
+      rotate: rotate,
+      width: width,
+      height: height,
+      border: border
     };
-  }
-
-  getImage() {
-    const cropRect = this.getCroppingRect();
-    const image = this.state.image;
+  };
+  _proto.getImage = function getImage() {
+    var cropRect = this.getCroppingRect();
+    var image = this.state.image;
     cropRect.x *= image.resource.width;
     cropRect.y *= image.resource.height;
     cropRect.width *= image.resource.width;
     cropRect.height *= image.resource.height;
-    const canvas = document.createElement('canvas');
-
+    var canvas = document.createElement('canvas');
     if (this.isVertical()) {
       canvas.width = cropRect.height;
       canvas.height = cropRect.width;
@@ -1443,27 +1469,21 @@ class AvatarEditor extends React.Component {
       canvas.width = cropRect.width;
       canvas.height = cropRect.height;
     }
-
-    const context = canvas.getContext('2d');
+    var context = canvas.getContext('2d');
     context.translate(canvas.width / 2, canvas.height / 2);
     context.rotate(this.props.rotate * Math.PI / 180);
     context.translate(-(canvas.width / 2), -(canvas.height / 2));
-
     if (this.isVertical()) {
       context.translate((canvas.width - canvas.height) / 2, (canvas.height - canvas.width) / 2);
     }
-
     context.drawImage(image.resource, -cropRect.x, -cropRect.y);
     return canvas;
-  }
-
-  getImageScaledToCanvas() {
-    const {
-      width,
-      height
-    } = this.getDimensions();
-    const canvas = document.createElement('canvas');
-
+  };
+  _proto.getImageScaledToCanvas = function getImageScaledToCanvas() {
+    var _this$getDimensions = this.getDimensions(),
+      width = _this$getDimensions.width,
+      height = _this$getDimensions.height;
+    var canvas = document.createElement('canvas');
     if (this.isVertical()) {
       canvas.width = height;
       canvas.height = width;
@@ -1471,70 +1491,61 @@ class AvatarEditor extends React.Component {
       canvas.width = width;
       canvas.height = height;
     }
-
     this.paintImage(canvas.getContext('2d'), this.state.image, 0, 1);
     return canvas;
-  }
-
-  getXScale() {
-    const canvasAspect = this.props.width / this.props.height;
-    const imageAspect = this.state.image.width / this.state.image.height;
+  };
+  _proto.getXScale = function getXScale() {
+    var canvasAspect = this.props.width / this.props.height;
+    var imageAspect = this.state.image.width / this.state.image.height;
     return Math.min(1, canvasAspect / imageAspect);
-  }
-
-  getYScale() {
-    const canvasAspect = this.props.height / this.props.width;
-    const imageAspect = this.state.image.height / this.state.image.width;
+  };
+  _proto.getYScale = function getYScale() {
+    var canvasAspect = this.props.height / this.props.width;
+    var imageAspect = this.state.image.height / this.state.image.width;
     return Math.min(1, canvasAspect / imageAspect);
-  }
-
-  getCroppingRect() {
-    const position = this.props.position || {
+  };
+  _proto.getCroppingRect = function getCroppingRect() {
+    var position = this.props.position || {
       x: this.state.image.x,
       y: this.state.image.y
     };
-    const width = 1 / this.props.scale * this.getXScale();
-    const height = 1 / this.props.scale * this.getYScale();
-    const croppingRect = {
+    var width = 1 / this.props.scale * this.getXScale();
+    var height = 1 / this.props.scale * this.getYScale();
+    var croppingRect = {
       x: position.x - width / 2,
       y: position.y - height / 2,
-      width,
-      height
+      width: width,
+      height: height
     };
-    let xMin = 0;
-    let xMax = 1 - croppingRect.width;
-    let yMin = 0;
-    let yMax = 1 - croppingRect.height;
-    const isLargerThanImage = this.props.disableBoundaryChecks || width > 1 || height > 1;
-
+    var xMin = 0;
+    var xMax = 1 - croppingRect.width;
+    var yMin = 0;
+    var yMax = 1 - croppingRect.height;
+    var isLargerThanImage = this.props.disableBoundaryChecks || width > 1 || height > 1;
     if (isLargerThanImage) {
       xMin = -croppingRect.width;
       xMax = 1;
       yMin = -croppingRect.height;
       yMax = 1;
     }
-
-    return { ...croppingRect,
+    return _extends({}, croppingRect, {
       x: Math.max(xMin, Math.min(croppingRect.x, xMax)),
       y: Math.max(yMin, Math.min(croppingRect.y, yMax))
-    };
-  }
-
-  loadImage(image) {
+    });
+  };
+  _proto.loadImage = function loadImage(image) {
     if (isFileAPISupported && image instanceof File) {
-      this.loadingImage = makeCancelable(loadImageFile(image)).promise.then(this.handleImageReady).catch(this.props.onLoadFailure);
+      this.loadingImage = makeCancelable(loadImageFile(image)).promise.then(this.handleImageReady)["catch"](this.props.onLoadFailure);
     } else if (typeof image === 'string') {
-      this.loadingImage = makeCancelable(loadImageURL(image, this.props.crossOrigin)).promise.then(this.handleImageReady).catch(this.props.onLoadFailure);
+      this.loadingImage = makeCancelable(loadImageURL(image, this.props.crossOrigin)).promise.then(this.handleImageReady)["catch"](this.props.onLoadFailure);
     }
-  }
-
-  getInitialSize(width, height) {
-    let newHeight;
-    let newWidth;
-    const dimensions = this.getDimensions();
-    const canvasRatio = dimensions.height / dimensions.width;
-    const imageRatio = height / width;
-
+  };
+  _proto.getInitialSize = function getInitialSize(width, height) {
+    var newHeight;
+    var newWidth;
+    var dimensions = this.getDimensions();
+    var canvasRatio = dimensions.height / dimensions.width;
+    var imageRatio = height / width;
     if (canvasRatio > imageRatio) {
       newHeight = this.getDimensions().height;
       newWidth = width * (newHeight / height);
@@ -1542,41 +1553,40 @@ class AvatarEditor extends React.Component {
       newWidth = this.getDimensions().width;
       newHeight = height * (newWidth / width);
     }
-
     return {
       height: newHeight,
       width: newWidth
     };
-  }
-
-  paintImage(context, image, border, scaleFactor = pixelRatio) {
+  };
+  _proto.paintImage = function paintImage(context, image, border, scaleFactor) {
+    if (scaleFactor === void 0) {
+      scaleFactor = pixelRatio;
+    }
     if (image.resource) {
-      const position = this.calculatePosition(image, border);
+      var position = this.calculatePosition(image, border);
       context.save();
       context.translate(context.canvas.width / 2, context.canvas.height / 2);
       context.rotate(this.props.rotate * Math.PI / 180);
       context.translate(-(context.canvas.width / 2), -(context.canvas.height / 2));
-
       if (this.isVertical()) {
         context.translate((context.canvas.width - context.canvas.height) / 2, (context.canvas.height - context.canvas.width) / 2);
       }
-
       context.scale(scaleFactor, scaleFactor);
       context.globalCompositeOperation = 'destination-over';
       context.drawImage(image.resource, position.x, position.y, position.width, position.height);
       context.restore();
     }
-  }
-
-  calculatePosition(image, border) {
+  };
+  _proto.calculatePosition = function calculatePosition(image, border) {
     image = image || this.state.image;
-    const [borderX, borderY] = this.getBorders(border);
-    const croppingRect = this.getCroppingRect();
-    const width = image.width * this.props.scale;
-    const height = image.height * this.props.scale;
-    let x = -croppingRect.x * width;
-    let y = -croppingRect.y * height;
-
+    var _this$getBorders2 = this.getBorders(border),
+      borderX = _this$getBorders2[0],
+      borderY = _this$getBorders2[1];
+    var croppingRect = this.getCroppingRect();
+    var width = image.width * this.props.scale;
+    var height = image.height * this.props.scale;
+    var x = -croppingRect.x * width;
+    var y = -croppingRect.y * height;
     if (this.isVertical()) {
       x += borderY;
       y += borderX;
@@ -1584,25 +1594,25 @@ class AvatarEditor extends React.Component {
       x += borderX;
       y += borderY;
     }
-
     return {
-      x,
-      y,
-      height,
-      width
+      x: x,
+      y: y,
+      height: height,
+      width: width
     };
-  }
-
-  paint(context) {
+  };
+  _proto.paint = function paint(context) {
     context.save();
     context.scale(pixelRatio, pixelRatio);
     context.translate(0, 0);
     context.fillStyle = 'rgba(' + this.props.color.slice(0, 4).join(',') + ')';
-    let borderRadius = this.props.borderRadius;
-    const dimensions = this.getDimensions();
-    const [borderSizeX, borderSizeY] = this.getBorders(dimensions.border);
-    const height = dimensions.canvas.height;
-    const width = dimensions.canvas.width;
+    var borderRadius = this.props.borderRadius;
+    var dimensions = this.getDimensions();
+    var _this$getBorders3 = this.getBorders(dimensions.border),
+      borderSizeX = _this$getBorders3[0],
+      borderSizeY = _this$getBorders3[1];
+    var height = dimensions.canvas.height;
+    var width = dimensions.canvas.width;
     borderRadius = Math.max(borderRadius, 0);
     borderRadius = Math.min(borderRadius, width / 2 - borderSizeX, height / 2 - borderSizeY);
     context.beginPath();
@@ -1610,63 +1620,37 @@ class AvatarEditor extends React.Component {
     context.rect(width, 0, -width, height);
     context.fill('evenodd');
     context.restore();
-  }
-
-  render() {
-    const {
-      scale,
-      rotate,
-      image,
-      border,
-      borderRadius,
-      width,
-      height,
-      position,
-      color,
-      style,
-      crossOrigin,
-      onLoadFailure,
-      onLoadSuccess,
-      onImageReady,
-      onImageChange,
-      onMouseUp,
-      onMouseMove,
-      onPositionChange,
-      disableBoundaryChecks,
-      disableHiDPIScaling,
-      ...rest
-    } = this.props;
-    const dimensions = this.getDimensions();
-    const defaultStyle = {
+  };
+  _proto.render = function render() {
+    var _this$props2 = this.props,
+      style = _this$props2.style,
+      rest = _objectWithoutPropertiesLoose(_this$props2, _excluded);
+    var dimensions = this.getDimensions();
+    var defaultStyle = {
       width: dimensions.canvas.width,
       height: dimensions.canvas.height,
       cursor: this.state.drag ? 'grabbing' : 'grab',
       touchAction: 'none'
     };
-    const attributes = {
+    var attributes = {
       width: dimensions.canvas.width * pixelRatio,
       height: dimensions.canvas.height * pixelRatio,
-      style: { ...defaultStyle,
-        ...style
-      }
+      style: _extends({}, defaultStyle, style)
     };
     attributes[deviceEvents.react.down] = this.handleMouseDown;
-
     if (isTouchDevice) {
       attributes[deviceEvents.react.mouseDown] = this.handleMouseDown;
     }
-
-    return /*#__PURE__*/React.createElement("canvas", Object.assign({
+    return /*#__PURE__*/React.createElement("canvas", _extends({
       ref: this.setCanvas
     }, attributes, rest));
-  }
-
-}
-
+  };
+  return AvatarEditor;
+}(React.Component);
 AvatarEditor.propTypes = {
   scale: propTypes.number,
   rotate: propTypes.number,
-  image: propTypes.oneOfType([propTypes.string, ...(isFileAPISupported ? [propTypes.instanceOf(File)] : [])]),
+  image: propTypes.oneOfType([propTypes.string].concat(isFileAPISupported ? [propTypes.instanceOf(File)] : [])),
   border: propTypes.oneOfType([propTypes.number, propTypes.arrayOf(propTypes.number)]),
   borderRadius: propTypes.number,
   width: propTypes.number,
@@ -1695,21 +1679,13 @@ AvatarEditor.defaultProps = {
   width: 200,
   height: 200,
   color: [0, 0, 0, 0.5],
-
-  onLoadFailure() {},
-
-  onLoadSuccess() {},
-
-  onImageReady() {},
-
-  onImageChange() {},
-
-  onMouseUp() {},
-
-  onMouseMove() {},
-
-  onPositionChange() {},
-
+  onLoadFailure: function onLoadFailure() {},
+  onLoadSuccess: function onLoadSuccess() {},
+  onImageReady: function onImageReady() {},
+  onImageChange: function onImageChange() {},
+  onMouseUp: function onMouseUp() {},
+  onMouseMove: function onMouseMove() {},
+  onPositionChange: function onPositionChange() {},
   disableBoundaryChecks: false,
   disableHiDPIScaling: false
 };
